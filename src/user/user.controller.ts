@@ -7,16 +7,8 @@ export class UserController {
 
     @Post()
     async signup(@Body() body: SignupReqDto) {
-        try {
-            // 회원가입
-            const { email, password, username, nick } = body;
-            // [1] email에 해당하는 계정 존재여부 파악
-            const user = await this.userService.signup();
-    
-            return 
-            
-        } catch (error) {
-            
-        }
+        // 회원가입
+        const user = await this.userService.signup(body);
+        return user;
     }
 }

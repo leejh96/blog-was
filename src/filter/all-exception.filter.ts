@@ -1,9 +1,10 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-
+import { utcToKst } from 'share/util/dayjs';
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
+    console.error(exception)
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
@@ -11,14 +12,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // 기본 상태 코드와 메시지 설정
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
-
     // 1. HTTP 예외 처리
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      message = exception.message || 'HTTP Exception occurred';
-    }
-    // 2. Prisma 예외 처리
-    else if (exception instanceof PrismaClientKnownRequestError) {
+      const exceptionResponse = exception.getResponse();
+      if (typeof exceptionResponse === 'object' && 'message' in exceptionResponse) {
+        // ValidationPipe의 에러 처리
+        message = exceptionResponse.message[0]; // 배열 형태의 메시지 가져오기
+      } else {
+        message = exception.message || 'HTTP Exception occurred';
+      }
+    } else if (exception instanceof PrismaClientKnownRequestError) {
+      // 2. Prisma 예외 처리
       // Prisma 에러 코드에 따른 상태 코드 및 메시지 설정
       if (exception.code === 'P2002') {
         status = HttpStatus.CONFLICT;
@@ -32,18 +37,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
       } else {
         message = 'Unexpected database error occurred';
       }
-    }
-    // 3. 기타 예외 처리
-    else if (exception instanceof Error) {
+    } else if (exception instanceof Error) {
+      // 3. 기타 예외 처리
       message = exception.message || 'Unexpected error occurred';
     }
-
     // 클라이언트 응답
     response.status(status).json({
       success: false,
       statusCode: status,
       message,
-      timestamp: new Date().toISOString(),
+      timestamp: utcToKst(new Date()),
       path: request.url,
     });
   }
