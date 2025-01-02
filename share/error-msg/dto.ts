@@ -12,3 +12,4 @@ export const invalidCharacter = (field: string, min:number, max:number) => {
 export const invalidPhoneNumber = '유효하지 않은 전화번호 형식입니다.';
 export const invalidNumber = (field: string) => `${field}이(가) 숫자가 아닙니다.`;
 export const invalidFiled = (field: string) => `유효하지 않은 ${field}입니다.`;
+export const invalidJwtToken = 'JWT 토큰 형식이 유효하지 않습니다.'

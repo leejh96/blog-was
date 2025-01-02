@@ -12,12 +12,16 @@ export interface User {
     gender: USER_GENDER,
     role: USER_ROLE,
     provider: USER_PROVIDER,
-    dateOfBirth: Date,
+    dateOfBirth: Date | string,
+    lastLoginTime: Date | string,
     status: USER_STATUS,
     profileImage: string | null,
     enable: boolean,
-    createdAt: Date,
-    updatedAt: Date,
+    createdAt: Date | string,
+    updatedAt: Date | string,
 };
-type SignupUserOmittedFields = 'userIdx' | 'enable' | 'createdAt' | 'updatedAt';
+type SignupUserOmittedFields = 'userIdx' | 'enable' | 'createdAt' | 'updatedAt' | 'lastLoginTime';
 export interface SignupUserInfo extends Omit<User, SignupUserOmittedFields> {}
+
+type UserOmittedFields = 'password' | 'enable' | 'createdAt' | 'updatedAt';
+export interface UserInfo extends Omit<User, UserOmittedFields> {}

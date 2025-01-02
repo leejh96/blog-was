@@ -1,6 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { utcToKst } from 'share/util/dayjs';
+import { duplicatedData } from 'share/error-msg/server';
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
@@ -17,8 +18,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
       if (typeof exceptionResponse === 'object' && 'message' in exceptionResponse) {
-        // ValidationPipe의 에러 처리
-        message = exceptionResponse.message[0]; // 배열 형태의 메시지 가져오기
+        if (Array.isArray(exceptionResponse.message)) {
+          // ValidationPipe의 에러 처리
+          message = exceptionResponse.message[0]; // 배열 형태의 메시지 가져오기
+        } else if (typeof exceptionResponse.message === 'string') {
+          // JWT Error 처리
+          message = exceptionResponse.message; // 배열 형태의 메시지 가져오기
+        }
       } else {
         message = exception.message || 'HTTP Exception occurred';
       }
@@ -27,7 +33,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // Prisma 에러 코드에 따른 상태 코드 및 메시지 설정
       if (exception.code === 'P2002') {
         status = HttpStatus.CONFLICT;
-        message = 'Duplicate entry detected';
+        message = duplicatedData(exception.meta.modelName, exception.meta.target);
       } else if (exception.code === 'P2025') {
         status = HttpStatus.NOT_FOUND;
         message = 'Record not found';

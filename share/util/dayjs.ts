@@ -8,10 +8,16 @@ import * as timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const dateTimeFormat = 'YYYY-MM-DD HH:mm:ss'
-
+const dateTimeFormat = 'YYYY-MM-DD HH:mm:ss';
+const dateFormat = 'YYYY-MM-DD';
 // kst -> utc
 export const kstToUtc = (kst) => dayjs.tz(kst, 'Asia/Seoul').toDate();
 
 // utc -> kst
 export const utcToKst = (utc) => dayjs(utc).tz('Asia/Seoul').format(dateTimeFormat);
+
+// 현재 UTC 시간
+export const nowUtc = dayjs().utc().format();
+
+// 입력한시간 Date로 포매팅
+export const formatDate = (time) => dayjs(time).format(dateFormat);

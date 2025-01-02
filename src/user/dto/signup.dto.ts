@@ -2,6 +2,8 @@ import { IsEmail, IsString, MaxLength, Matches, IsDateString, IsEnum, IsUrl, IsO
 import { Transform, TransformFnParams } from 'class-transformer';
 import { invalidPassword, invalidString, invalidEmailForm, invalidCharacter, invalidPhoneNumber, invalidNumber, invalidFiled } from 'share/error-msg/dto';
 import { USER_GENDER, USER_PROVIDER } from 'share/var/user.enum';
+import { User } from "src/user/interface/user.interface";
+
 const Trim = () =>
     Transform(({ value }: TransformFnParams) => (typeof value === 'string' ? value.trim() : value));
 
@@ -56,4 +58,9 @@ export class SignupReqDto {
     @IsString({ message: invalidString('프로필 이미지') }) // 문자열 확인
     @IsUrl({}, { message: invalidFiled('프로필 이미지') }) // 유효한 URL 검증
     profileImage?: string;
+}
+
+type UserPickedField = Pick<User, 'userIdx'>
+export class SignupResDto implements UserPickedField {
+    userIdx: number;
 }

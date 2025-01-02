@@ -1,14 +1,32 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Header, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { SignupReqDto } from './dto/signup/signup-req.dto';
+import { SignupReqDto, SignupResDto } from './dto/signup.dto';
+import { SigninReqDto, SigninResDto } from './dto/signin.dto';
+import { JwtAuthGuard } from 'src/guard/auth.guard';
+import { GetUserResDto } from './dto/get-user.dto';
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Post()
-    async signup(@Body() body: SignupReqDto) {
+    async signup(@Body() body: SignupReqDto): Promise<SignupResDto>{
         // 회원가입
-        const user = await this.userService.signup(body);
-        return user;
+        const userIdx = await this.userService.signup(body);
+        return { userIdx };
+    }
+
+    @Post('/signin')
+    async signin(@Body() body: SigninReqDto): Promise<SigninResDto> {
+        // 로그인
+        const token = await this.userService.signin(body);
+        return { token };
+    }
+
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    async getUser(@Req() req: any): Promise<GetUserResDto> {
+        const userIdx = req.userIdx;
+        const user = await this.userService.getUser(userIdx);
+        return { user };
     }
 }
