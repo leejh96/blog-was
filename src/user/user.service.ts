@@ -6,27 +6,16 @@ import { SignupUserInfo, UserInfo } from './interface/user.interface';
 import { USER_ROLE, USER_STATUS } from 'share/var/user.enum';
 import { SignupReqDto } from './dto/signup.dto';
 import { SigninReqDto } from './dto/signin.dto';
-import { JwtService } from '@nestjs/jwt';
 import { formatDate, nowUtc, utcToKst } from 'share/util/dayjs';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly passwordUtil: PasswordService,
-        private readonly jwt: JwtService,
+        private readonly auth: AuthService,
     ) {}
-
-    // JWT 토큰 발급
-    async generateToken(user: UserInfo): Promise<string> {
-        const payload = user; // JWT 페이로드
-        return this.jwt.sign(payload);
-    }
-
-    // JWT 토큰 검증
-    async verifyToken(token: string): Promise<any> {
-        return this.jwt.verify(token);
-    }
 
     async signup(arg: SignupReqDto) {
         const { email, password, dateOfBirth, profileImage = null } = arg;
@@ -58,12 +47,14 @@ export class UserService {
             }
     
             // 4. 회원 정보 저장
-            const user = await prisma.userInfo.create({
-                data: signupInfo,
-                select: {
-                    userIdx: true,
-                },
-            });
+            const user = await this.prisma.transaction((prisma) => {
+                return prisma.userInfo.create({
+                    data: signupInfo,
+                    select: {
+                        userIdx: true,
+                    }
+                })
+            })
     
             return user.userIdx;
         })
@@ -109,10 +100,10 @@ export class UserService {
 
         // 3. JWT 생성
         delete user.password // password 정보 제거
-        const token = this.generateToken(user);
+        const token = this.auth.generateToken(user);
 
         // 4. lastLoginTime 업데이트
-        this.prisma.transaction(async(prisma) => {
+        await this.prisma.transaction(async(prisma) => {
             await prisma.userInfo.update({
                 where: { userIdx: user.userIdx },
                 data: { lastLoginTime: nowUtc },

@@ -2,6 +2,10 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { PostModule } from './post/post.module';
+import { NoticeModule } from './notice/notice.module';
+import { PostCategoryModule } from './post-category/post-category.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -10,7 +14,11 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env', // .env 파일의 경로 (기본값은 루트 디렉터리)
     }),
     UserModule,
-    PrismaModule
+    PrismaModule,
+    PostModule,
+    NoticeModule,
+    PostCategoryModule,
+    AuthModule
   ],
 })
 export class AppModule {}

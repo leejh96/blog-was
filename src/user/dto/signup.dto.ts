@@ -3,6 +3,7 @@ import { Transform, TransformFnParams } from 'class-transformer';
 import { invalidPassword, invalidString, invalidEmailForm, invalidCharacter, invalidPhoneNumber, invalidNumber, invalidFiled } from 'share/error-msg/dto';
 import { USER_GENDER, USER_PROVIDER } from 'share/var/user.enum';
 import { User } from "src/user/interface/user.interface";
+import { GlobalResDto } from 'share/global.dto';
 
 const Trim = () =>
     Transform(({ value }: TransformFnParams) => (typeof value === 'string' ? value.trim() : value));
@@ -61,6 +62,6 @@ export class SignupReqDto {
 }
 
 type UserPickedField = Pick<User, 'userIdx'>
-export class SignupResDto implements UserPickedField {
+export class SignupResDto extends GlobalResDto implements UserPickedField {
     userIdx: number;
 }
