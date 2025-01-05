@@ -5,10 +5,9 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { PasswordService } from 'share/util/password';
 import { AuthModule } from 'src/auth/auth.module';
 
-
 @Module({
-  imports: [PrismaModule, AuthModule],
-  providers: [UserService, PasswordService],
-  controllers: [UserController]
+    imports: [PrismaModule, AuthModule],
+    providers: [UserService, PasswordService],
+    controllers: [UserController],
 })
 export class UserModule {}

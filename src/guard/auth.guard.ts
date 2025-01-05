@@ -1,6 +1,15 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+    Injectable,
+    CanActivate,
+    ExecutionContext,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { invalidToken, isNotAuthUser, notExistAuthHeader } from 'share/error-msg/server';
+import {
+    invalidToken,
+    isNotAuthUser,
+    notExistAuthHeader,
+} from 'share/error-msg/server';
 import { USER_ROLE } from 'share/var/user.enum';
 import { AuthService } from 'src/auth/auth.service';
 
@@ -34,10 +43,9 @@ export class AdminGuard extends AuthGuard {
         const request = context.switchToHttp().getRequest();
         const user = request.user;
 
-        if (user.role === USER_ROLE.ADMIN) {
-            return true;
-        } else {
-            return false;
+        if (user.role !== USER_ROLE.ADMIN) {
+            throw new UnauthorizedException(isNotAuthUser);
         }
+        return false;
     }
 }

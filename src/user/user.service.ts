@@ -1,6 +1,16 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+    ConflictException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { serverError, existUser, notExistUser, invalidPassword } from 'share/error-msg/server';
+import {
+    serverError,
+    existUser,
+    notExistUser,
+    invalidPassword,
+} from 'share/error-msg/server';
 import { PasswordService } from 'share/util/password';
 import { SignupUserInfo, UserInfo } from './interface/user.interface';
 import { USER_ROLE, USER_STATUS } from 'share/var/user.enum';
@@ -23,19 +33,19 @@ export class UserService {
             // 1. 중복 유저 확인
             const findUser = await prisma.userInfo.findUnique({
                 where: { email },
-                select: { userIdx: true }
+                select: { userIdx: true },
             });
-    
+
             if (findUser) {
                 throw new ConflictException(existUser);
             }
-    
+
             // 2. 비밀번호 암호화
             const hashData = await this.passwordUtil.hashPassword(password);
             if (!hashData.success) {
-                throw new Error(serverError)
+                throw new Error(serverError);
             }
-    
+
             // 3. 기본 정보 추가
             const signupInfo: SignupUserInfo = {
                 ...arg,
@@ -44,20 +54,20 @@ export class UserService {
                 password: hashData.password,
                 status: USER_STATUS.ACTIVE,
                 profileImage,
-            }
-    
+            };
+
             // 4. 회원 정보 저장
             const user = await this.prisma.transaction((prisma) => {
                 return prisma.userInfo.create({
                     data: signupInfo,
                     select: {
                         userIdx: true,
-                    }
-                })
-            })
-    
+                    },
+                });
+            });
+
             return user.userIdx;
-        })
+        });
     }
 
     async signin(arg: SigninReqDto) {
@@ -84,32 +94,34 @@ export class UserService {
                 lastLoginTime: true,
                 status: true,
                 profileImage: true,
-            }
+            },
         });
 
-        if(!user) {
+        if (!user) {
             throw new NotFoundException(notExistUser);
         }
 
         // 2. 비밀번호 비교
-        const compare = await this.passwordUtil.comparePassword(password, user.password);
+        const compare = await this.passwordUtil.comparePassword(
+            password,
+            user.password,
+        );
 
-        if(!compare) {
-            throw new UnauthorizedException(invalidPassword)
+        if (!compare) {
+            throw new UnauthorizedException(invalidPassword);
         }
 
         // 3. JWT 생성
-        delete user.password // password 정보 제거
+        delete user.password; // password 정보 제거
         const token = this.auth.generateToken(user);
 
         // 4. lastLoginTime 업데이트
-        await this.prisma.transaction(async(prisma) => {
+        await this.prisma.transaction(async (prisma) => {
             await prisma.userInfo.update({
                 where: { userIdx: user.userIdx },
                 data: { lastLoginTime: nowUtc },
             });
         });
-          
 
         return token;
     }
@@ -132,7 +144,7 @@ export class UserService {
                 lastLoginTime: true,
                 status: true,
                 profileImage: true,
-            }
+            },
         });
 
         return {

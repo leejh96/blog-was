@@ -1,5 +1,5 @@
-import { HttpStatus } from "@nestjs/common";
-import { successMsg, failMsg } from "share/error-msg/dto";
+import { HttpStatus } from '@nestjs/common';
+import { successMsg, failMsg } from 'share/error-msg/dto';
 
 export const defaultSuccessRes = {
     success: true,
