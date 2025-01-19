@@ -7,5 +7,6 @@ import { AuthModule } from 'src/auth/auth.module';
     imports: [PrismaModule, AuthModule],
     controllers: [PostCategoryController],
     providers: [PostCategoryService],
+    exports: [PostCategoryService]
 })
-export class PostCategoryModule {}
+export class PostCategoryModule { }
