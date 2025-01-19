@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("MYSQL_URL")
+}
+
+model UserInfo {
+  userIdx       Int       @id @default(autoincrement()) @map("USER_IDX")
+  email         String    @unique @map("EMAIL")
+  firstName     String    @map("FIRST_NAME")
+  lastName      String    @map("LAST_NAME")
+  password      String    @map("PASSWORD")
+  nickname      String?   @map("NICKNAME")
+  tag           String?   @map("TAG") // 닉네임 중복을 허용하기 위한 태그값
+  phoneNumber   String?   @unique @map("PHONE_NUMBER")
+  gender        Int       @db.TinyInt @map("GENDER") // Number 대신 Int로 변경
+  role          Int       @db.TinyInt @map("ROLE")   // Number 대신 Int로 변경
+  provider      Int       @db.TinyInt @map("PROVIDER")
+  dateOfBirth   DateTime  @db.Date @map("DATE_OF_BIRTH")
+  lastLoginTime DateTime? @map("LAST_LOGIN_TIME")
+  status        Int       @db.TinyInt @map("STATUS")
+  profileImage  String?   @map("PROFILE_IMAGE")
+  enable        Boolean   @default(true) @map("ENABLE")
+  createdAt     DateTime  @default(now()) @map("CREATED_AT")
+  updatedAt     DateTime  @updatedAt @map("UPDATED_AT")
+
+  notices       Notice[] // 공지사항과 관계설정
+  posts         Post[] // 게시물과 관계설정
+  postComments  PostComment[] // 댓글과 관계설정
+  @@index([createdAt, provider])
+  @@unique([nickname, tag])
+  @@index([lastLoginTime, provider])
+
+  @@map("USER_INFO") // 테이블 이름을 USER_INFO로 설정
+}
+
+
+model Notice {
+  noticeIdx     Int          @id @default(autoincrement()) @map("NOTICE_IDX")
+  title         String       @map("TITLE")
+  content       String       @map("CONTENT")
+  isPublished   Boolean      @default(true) @map("IS_PUBLISHED")
+  publishedAt   DateTime?    @default(now()) @map("PUBLISHED_AT") // 실제 게시 날짜
+  enable        Boolean      @default(true) @map("ENABLE")
+  createdAt     DateTime     @default(now()) @map("CREATED_AT")
+  updatedAt     DateTime     @updatedAt @map("UPDATED_AT")
+  userIdx       Int          @map("USER_IDX") // 외래 키 추가
+
+  author        UserInfo @relation(fields: [userIdx], references: [userIdx]) // 작성자와의 관계
+  uploadFiles   NoticeFile[] // 관계 설정
+
+
+  @@index([publishedAt, isPublished])
+  @@index([isPublished])
+  @@index([title, isPublished])
+  @@index([userIdx])
+
+  @@map("NOTICE") // 테이블 이름을 NOTICE로 설정
+}
+
+
+model NoticeFile {
+  noticeFileIdx Int           @id @default(autoincrement()) @map("NOTICE_FILE_IDX") // 파일의 고유 식별자
+  fileUrl       String        @map("FILE_URL")             // 첨부 파일 경로
+  enable        Boolean       @default(true) @map("ENABLE")
+  createdAt     DateTime      @default(now()) @map("CREATED_AT")
+  updatedAt     DateTime      @updatedAt @map("UPDATED_AT")
+  noticeIdx     Int           @map("NOTICE_IDX")            // 외래 키 컬럼
+  notice        Notice        @relation(fields: [noticeIdx], references: [noticeIdx]) // 관계 설정
+
+  @@map("NOTICE_FILE") // 테이블 이름을 NOTICE_FILE로 설정
+}
+
+model Post {
+  postIdx         Int            @id @default(autoincrement()) @map("POST_IDX") // 게시물 고유 ID
+  title           String         @map("TITLE")                // 게시물 제목
+  content         String         @db.Text @map("CONTENT")     // 게시물 내용 (Markdown)
+  isPublished     Boolean        @default(false) @map("IS_PUBLISHED") // 게시 여부
+  userIdx         Int            @map("USER_IDX")             // 작성자 ID (외래 키)
+  postCategoryIdx Int            @map("POST_CATEGORY_IDX")    // 카테고리 ID (외래 키)
+  publishedAt     DateTime?      @default(now()) @map("PUBLISHED_AT") // 실제 게시 날짜
+  enable          Boolean        @default(true) @map("ENABLE")
+  createdAt       DateTime       @default(now()) @map("CREATED_AT") // 생성 날짜
+  updatedAt       DateTime       @updatedAt @map("UPDATED_AT") // 수정 날짜
+
+  // 관계 필드
+  author        UserInfo       @relation(fields: [userIdx], references: [userIdx]) // 작성자
+  postCategory  PostCategory   @relation(fields: [postCategoryIdx], references: [postCategoryIdx]) // 카테고리
+  postComments  PostComment[]  // 게시물의 댓글 리스트
+
+  @@index([publishedAt, isPublished])
+  @@index([isPublished])
+  @@index([title, isPublished])
+  @@index([userIdx])
+
+  @@map("POST") // 테이블 이름 설정
+}
+
+model PostCategory {
+  postCategoryIdx Int         @id @default(autoincrement()) @map("POST_CATEGORY_IDX") // 카테고리 고유 ID
+  name            String      @unique @map("NAME")         // 카테고리 이름
+  description     String?     @map("DESCRIPTION")          // 카테고리 설명 (선택적)
+  enable          Boolean     @default(true) @map("ENABLE")
+  createdAt       DateTime    @default(now()) @map("CREATED_AT") // 생성 날짜
+  updatedAt       DateTime    @updatedAt @map("UPDATED_AT") // 수정 날짜
+
+  // 관계 필드
+  posts           Post[]    // 카테고리에 포함된 게시물 리스트
+
+  @@map("POST_CATEGORY") // 테이블 이름 설정
+  
+  @@index([name, enable])
+}
+
+model PostComment {
+  postCommentIdx Int       @id @default(autoincrement()) @map("POST_COMMENT_IDX") // 댓글 고유 ID
+  content        String    @db.Text @map("CONTENT")     // 댓글 내용
+  postIdx        Int       @map("POST_IDX")            // 게시물 ID (외래 키)
+  userIdx        Int       @map("USER_IDX")            // 작성자 ID (외래 키)
+  parentCommentIdx Int?    @map("PARENT_COMMENT_IDX")  // 부모 댓글 ID (nullable)
+  enable         Boolean   @default(true) @map("ENABLE")
+  createdAt      DateTime  @default(now()) @map("CREATED_AT") // 댓글 작성 시간
+  updatedAt      DateTime  @updatedAt @map("UPDATED_AT") // 댓글 수정 시간
+
+  // 관계 필드
+  post             Post             @relation(fields: [postIdx], references: [postIdx]) // 댓글이 속한 게시물
+  author           UserInfo         @relation(fields: [userIdx], references: [userIdx]) // 댓글 작성자
+  parentComment    PostComment?     @relation("ChildComments", fields: [parentCommentIdx], references: [postCommentIdx]) // 부모 댓글
+  childComments    PostComment[]    @relation("ChildComments") // 자식 댓글 리스트
+
+  @@index([parentCommentIdx])
+  @@index([postIdx])
+  @@index([userIdx])
+
+
+  @@map("POST_COMMENT") // 테이블 이름 설정
+}
