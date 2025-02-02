@@ -1,7 +1,7 @@
 import { IsBoolean, IsDateString, IsInt, IsNotEmpty, IsOptional, Max, MaxLength } from "class-validator";
 import { invalidFiled } from "share/error-msg/dto";
 import { GlobalResDto } from "share/global.dto";
-import { Post } from "../interface/post.interface";
+import { Post } from "@prisma/client"
 
 export class CreatePostReqDto {
     @IsNotEmpty()
