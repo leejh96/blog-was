@@ -1,12 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PostCategoryService } from 'src/post-category/post-category.service';
 import { UserService } from 'src/user/user.service';
 import { GetPostDto } from './dto/get-post.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { USER_ROLE } from 'share/var/user.enum';
 import { GetPostListDto } from './dto/get-post-list.dto';
-import { CreatePostDto } from './dto/create-post.dto';
-import { notExistCategory, notExistUser } from 'share/error-msg/server';
+import { CreatePostReqDto } from './dto/create-post.dto';
+import { notExistCategory, notExistUser, serverError } from 'share/error-msg/server';
 
 @Injectable()
 export class PostService {
@@ -110,7 +108,7 @@ export class PostService {
         return post;
     }
 
-    async createPost(arg: CreatePostDto) {
+    async createPost(arg: CreatePostReqDto) {
         const { title, content, isPublished, publishedAt, userIdx, postCategoryIdx } = arg;
         // 작성자 검증
         const user = await this.prisma.userInfo.findUnique({ where: { userIdx } });
@@ -121,7 +119,7 @@ export class PostService {
         if (!category) throw new NotFoundException(notExistCategory);
 
         // 게시글 생성
-        return await this.prisma.post.create({
+        const post = await this.prisma.post.create({
             data: {
                 title,
                 content,
@@ -131,6 +129,12 @@ export class PostService {
                 postCategoryIdx,
             },
         });
+
+        if (!post) {
+            throw new Error(serverError)
+        }
+
+        return post;
     }
 
 }

@@ -1,7 +1,9 @@
 import { IsBoolean, IsDateString, IsInt, IsNotEmpty, IsOptional, Max, MaxLength } from "class-validator";
 import { invalidFiled } from "share/error-msg/dto";
+import { GlobalResDto } from "share/global.dto";
+import { Post } from "../interface/post.interface";
 
-export class CreatePostDto {
+export class CreatePostReqDto {
     @IsNotEmpty()
     @MaxLength(500, { message: invalidFiled('제목') })
     title: string;
@@ -25,4 +27,8 @@ export class CreatePostDto {
     @IsNotEmpty()
     @IsInt()
     postCategoryIdx: number;
+}
+
+export class CreatePostResDto extends GlobalResDto {
+    post: Post
 }

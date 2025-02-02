@@ -4,7 +4,7 @@ import { AdminGuard, AuthGuard } from 'src/guard/auth.guard';
 import { GetPostDto } from './dto/get-post.dto';
 import { GetPostListDto } from './dto/get-post-list.dto'
 import { defaultSuccessRes } from 'share/var/default.res';
-import { CreatePostDto } from './dto/create-post.dto';
+import { CreatePostReqDto, CreatePostResDto } from './dto/create-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -26,8 +26,8 @@ export class PostController {
 
     @Post()
     @UseGuards(AdminGuard)
-    async createPost(@Body() body: CreatePostDto) {
+    async createPost(@Body() body: CreatePostReqDto): Promise<CreatePostResDto> {
         const result = await this.post.createPost(body);
-        return { ...defaultSuccessRes, result };
+        return { ...defaultSuccessRes, post: result };
     }
 }
