@@ -1,9 +1,10 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { PostService } from './post.service';
-import { AdminGuard } from 'src/guard/auth.guard';
+import { AdminGuard, AuthGuard } from 'src/guard/auth.guard';
 import { GetPostDto } from './dto/get-post.dto';
 import { GetPostListDto } from './dto/get-post-list.dto'
 import { defaultSuccessRes } from 'share/var/default.res';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -15,11 +16,18 @@ export class PostController {
         const result = await this.post.getPostList(query);
         return { ...defaultSuccessRes, result };
     }
+
     @Get(':postIdx')
+    @UseGuards(AuthGuard)
     async getPost(@Param() params: GetPostDto) {
         const result = await this.post.getPost(params);
         return { ...defaultSuccessRes, result };
     }
 
-
+    @Post()
+    @UseGuards(AdminGuard)
+    async createPost(@Body() body: CreatePostDto) {
+        const result = await this.post.createPost(body);
+        return { ...defaultSuccessRes, result };
+    }
 }

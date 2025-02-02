@@ -15,7 +15,7 @@ import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private readonly auth: AuthService) {}
+    constructor(private readonly auth: AuthService) { }
     canActivate(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest();
         const token = request.headers['authorization'];
@@ -46,6 +46,6 @@ export class AdminGuard extends AuthGuard {
         if (user.role !== USER_ROLE.ADMIN) {
             throw new UnauthorizedException(isNotAuthUser);
         }
-        return false;
+        return true;
     }
 }
