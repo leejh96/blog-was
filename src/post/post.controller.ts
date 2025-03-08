@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/co
 import { PostService } from './post.service';
 import { AdminGuard, AuthGuard } from 'src/guard/auth.guard';
 import { GetPostDto } from './dto/get-post.dto';
-import { GetPostListDto } from './dto/get-post-list.dto'
+import { GetPostListDto, GetPostListResDto } from './dto/get-post-list.dto'
 import { defaultSuccessRes } from 'share/var/default.res';
 import { CreatePostReqDto, CreatePostResDto } from './dto/create-post.dto';
 
@@ -10,10 +10,10 @@ import { CreatePostReqDto, CreatePostResDto } from './dto/create-post.dto';
 export class PostController {
     constructor(private readonly post: PostService) { }
     @Get()
-    async getPostList(@Query() query: GetPostListDto) {
+    async getPosts(@Query() query: GetPostListDto) {
         query.page = query.page ?? 1;
         query.limit = query.limit ?? 10;
-        const result = await this.post.getPostList(query);
+        const result = await this.post.getPosts(query);
         return { ...defaultSuccessRes, result };
     }
 

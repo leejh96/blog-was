@@ -13,14 +13,23 @@ export class PostService {
         private readonly prisma: PrismaService,
     ) { }
 
-    async getPostList(arg: GetPostListDto) {
+    async getPosts(arg: GetPostListDto) {
         const { page, limit } = arg;
-        const postList = await this.prisma.post.findMany({
+
+        const posts = await this.prisma.post.findMany({
             where: {
                 isPublished: true,
                 enable: true,
             },
-            include: {
+            select: {
+                postIdx: true,
+                title: true,
+                isPublished: true,
+                publishedAt: true,
+                userIdx: true,
+                postCategoryIdx: true,
+                createdAt: true,
+                updatedAt: true,
                 author: {
                     select: {
                         userIdx: true,
@@ -28,11 +37,13 @@ export class PostService {
                     }
                 }
             },
-            skip: (page - 1) * limit, // offset 계산
-            take: limit, // 가져올 데이터 개수
+            orderBy: {
+                createdAt: 'desc'
+            },
+            skip: (page - 1) * limit,
+            take: limit,
         });
-
-        return postList;
+        return posts;
     }
 
     async getPost(arg: GetPostDto) {
