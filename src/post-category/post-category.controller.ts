@@ -5,7 +5,7 @@ import {
     CreatePostCtgryResDto,
 } from './dto/create-post-category.dto';
 import { defaultSuccessRes } from 'share/var/default.res';
-import { AdminGuard } from 'src/guard/auth.guard';
+import { AuthGuard, AdminGuard } from 'src/guard/auth.guard';
 @Controller('post-category')
 export class PostCategoryController {
     constructor(private readonly postCtgrySvc: PostCategoryService) {}

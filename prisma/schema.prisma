@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("MYSQL_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model UserInfo {
@@ -16,12 +16,12 @@ model UserInfo {
   nickname      String?   @map("NICKNAME")
   tag           String?   @map("TAG") // 닉네임 중복을 허용하기 위한 태그값
   phoneNumber   String?   @unique @map("PHONE_NUMBER")
-  gender        Int       @db.TinyInt @map("GENDER") // Number 대신 Int로 변경
-  role          Int       @db.TinyInt @map("ROLE")   // Number 대신 Int로 변경
-  provider      Int       @db.TinyInt @map("PROVIDER")
+  gender        Int       @db.SmallInt @map("GENDER") // Number 대신 Int로 변경
+  role          Int       @db.SmallInt @map("ROLE")   // Number 대신 Int로 변경
+  provider      Int       @db.SmallInt @map("PROVIDER")
   dateOfBirth   DateTime  @db.Date @map("DATE_OF_BIRTH")
   lastLoginTime DateTime? @map("LAST_LOGIN_TIME")
-  status        Int       @db.TinyInt @map("STATUS")
+  status        Int       @db.SmallInt @map("STATUS")
   profileImage  String?   @map("PROFILE_IMAGE")
   enable        Boolean   @default(true) @map("ENABLE")
   createdAt     DateTime  @default(now()) @map("CREATED_AT")
