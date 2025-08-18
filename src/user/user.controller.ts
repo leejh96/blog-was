@@ -21,6 +21,7 @@ export class UserController {
     @Post()
     async signup(@Body() body: SignupReqDto): Promise<SignupResDto> {
         // 회원가입
+        console.log(body);
         const userIdx = await this.userService.signup(body);
         return {
             ...defaultSuccessRes,

@@ -87,11 +87,9 @@ export class PostService {
                     select: {
                         userIdx: true,
                         nickname: true,
-                        tag: true,
                         role: true,
                         status: true,
                         enable: true,
-                        profileImage: true,
                     },
                 },
                 postCategory: {
@@ -105,10 +103,8 @@ export class PostService {
                             select: {
                                 userIdx: true,
                                 nickname: true,
-                                tag: true,
                                 role: true,
                                 status: true,
-                                profileImage: true,
                             }
                         }
                     }

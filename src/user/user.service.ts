@@ -28,9 +28,9 @@ export class UserService {
     ) {}
 
     async signup(arg: SignupReqDto) {
-        const { email, password, dateOfBirth, profileImage = null } = arg;
+        const { email, password, name, nickname } = arg;
         return this.prisma.transaction(async (prisma) => {
-            // 1. 중복 유저 확인
+            // 1. 중복 유저 확인 (이메일)
             const findUser = await prisma.userInfo.findUnique({
                 where: { email },
                 select: { userIdx: true },
@@ -38,6 +38,16 @@ export class UserService {
 
             if (findUser) {
                 throw new ConflictException(existUser);
+            }
+
+            // 1-2. 중복 닉네임 확인
+            const findNickname = await prisma.userInfo.findFirst({
+                where: { nickname, enable: true },
+                select: { userIdx: true },
+            });
+
+            if (findNickname) {
+                throw new ConflictException('이미 사용 중인 닉네임입니다.');
             }
 
             // 2. 비밀번호 암호화
@@ -48,22 +58,21 @@ export class UserService {
 
             // 3. 기본 정보 추가
             const signupInfo: SignupUserInfo = {
-                ...arg,
-                dateOfBirth: new Date(dateOfBirth),
-                role: USER_ROLE.USER,
+                email,
+                name,
+                nickname,
                 password: hashData.password,
+                role: USER_ROLE.USER,
                 status: USER_STATUS.ACTIVE,
-                profileImage,
+                gender: arg.gender || null,
             };
 
             // 4. 회원 정보 저장
-            const user = await this.prisma.transaction((prisma) => {
-                return prisma.userInfo.create({
-                    data: signupInfo,
-                    select: {
-                        userIdx: true,
-                    },
-                });
+            const user = await prisma.userInfo.create({
+                data: signupInfo,
+                select: {
+                    userIdx: true,
+                },
             });
 
             return user.userIdx;
@@ -82,18 +91,12 @@ export class UserService {
                 userIdx: true,
                 password: true,
                 email: true,
-                firstName: true,
-                lastName: true,
+                name: true,
                 nickname: true,
-                tag: true,
-                phoneNumber: true,
                 gender: true,
                 role: true,
-                provider: true,
-                dateOfBirth: true,
                 lastLoginTime: true,
                 status: true,
-                profileImage: true,
             },
         });
 
@@ -132,25 +135,18 @@ export class UserService {
             select: {
                 userIdx: true,
                 email: true,
-                firstName: true,
-                lastName: true,
+                name: true,
                 nickname: true,
-                tag: true,
-                phoneNumber: true,
                 gender: true,
                 role: true,
-                provider: true,
-                dateOfBirth: true,
                 lastLoginTime: true,
                 status: true,
-                profileImage: true,
             },
         });
 
         return {
             ...user,
             lastLoginTime: utcToKst(user.lastLoginTime),
-            dateOfBirth: formatDate(user.dateOfBirth),
         };
     }
 }

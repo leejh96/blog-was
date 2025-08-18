@@ -6,6 +6,12 @@ import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+    app.enableCors({
+        origin: true, // 모든 origin 허용 (개발용)
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true, // 쿠키, 인증 헤더 허용
+    });
     app.useGlobalFilters(new AllExceptionsFilter());
     app.useGlobalPipes(
         new ValidationPipe({

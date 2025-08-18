@@ -10,19 +10,13 @@ datasource db {
 model UserInfo {
   userIdx       Int       @id @default(autoincrement()) @map("USER_IDX")
   email         String    @unique @map("EMAIL")
-  firstName     String    @map("FIRST_NAME")
-  lastName      String    @map("LAST_NAME")
+  name          String    @map("NAME")
+  nickname      String    @unique @map("NICKNAME")
   password      String    @map("PASSWORD")
-  nickname      String?   @map("NICKNAME")
-  tag           String?   @map("TAG") // 닉네임 중복을 허용하기 위한 태그값
-  phoneNumber   String?   @unique @map("PHONE_NUMBER")
-  gender        Int       @db.SmallInt @map("GENDER") // Number 대신 Int로 변경
-  role          Int       @db.SmallInt @map("ROLE")   // Number 대신 Int로 변경
-  provider      Int       @db.SmallInt @map("PROVIDER")
-  dateOfBirth   DateTime  @db.Date @map("DATE_OF_BIRTH")
+  gender        Int?      @db.SmallInt @map("GENDER")
+  role          Int       @default(1) @db.SmallInt @map("ROLE")
   lastLoginTime DateTime? @map("LAST_LOGIN_TIME")
-  status        Int       @db.SmallInt @map("STATUS")
-  profileImage  String?   @map("PROFILE_IMAGE")
+  status        Int       @default(1) @db.SmallInt @map("STATUS")
   enable        Boolean   @default(true) @map("ENABLE")
   createdAt     DateTime  @default(now()) @map("CREATED_AT")
   updatedAt     DateTime  @updatedAt @map("UPDATED_AT")
@@ -30,9 +24,11 @@ model UserInfo {
   notices       Notice[] // 공지사항과 관계설정
   posts         Post[] // 게시물과 관계설정
   postComments  PostComment[] // 댓글과 관계설정
-  @@index([createdAt, provider])
-  @@unique([nickname, tag])
-  @@index([lastLoginTime, provider])
+  
+  @@index([createdAt])
+  @@index([lastLoginTime])
+  @@index([email])
+  @@index([nickname])
 
   @@map("USER_INFO") // 테이블 이름을 USER_INFO로 설정
 }
@@ -78,6 +74,7 @@ model Post {
   postIdx         Int            @id @default(autoincrement()) @map("POST_IDX") // 게시물 고유 ID
   title           String         @map("TITLE")                // 게시물 제목
   content         String         @db.Text @map("CONTENT")     // 게시물 내용 (Markdown)
+  tags            String?        @map("TAGS")                 // 게시물 태그 (콤마로 구분된 태그들)
   isPublished     Boolean        @default(false) @map("IS_PUBLISHED") // 게시 여부
   userIdx         Int            @map("USER_IDX")             // 작성자 ID (외래 키)
   postCategoryIdx Int            @map("POST_CATEGORY_IDX")    // 카테고리 ID (외래 키)
@@ -95,6 +92,7 @@ model Post {
   @@index([isPublished])
   @@index([title, isPublished])
   @@index([userIdx])
+  @@index([tags])
 
   @@map("POST") // 테이블 이름 설정
 }
